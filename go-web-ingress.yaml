@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-web
+  labels:
+    app: go-web
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    run: go-web
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: go-web-ingress
+spec:
+  rules:
+  - host: go-web.brianredmond.co
+    http:
+      paths:
+      - backend:
+          serviceName: go-web
+          servicePort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: go-web
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        run: go-web
+        app: go-web
+    spec:
+      containers:
+      - name: go-web
+        image: chzbrgr71/go-web
+        env:
+        - name: HOST_PLATFORM
+          value: "ACS Kubernetes"
+        ports:
+          - containerPort: 8080
